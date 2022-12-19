@@ -1,0 +1,6 @@
+onnx==1.13.0
+onnxruntime==1.13.1
+clip-marqo==1.0.2
+open_clip_torch==2.0.2
+torch==1.12.1
+numpy==1.23.4
