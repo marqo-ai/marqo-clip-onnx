@@ -60,13 +60,17 @@ f32onnx_image_output = f32_visual_session.run(None, {"input": image_onnx})[0]
 f32onnx_text_output = f32_textual_session.run(None, {"input": text_onnx})[0]
 
 
-print(f"float16onnx image sum difference without normalization: {np.abs(np.array(torch_image_output) - np.array(f16onnx_image_output)).sum()}")
+def compute_dif(a, b):
+    return np.abs(np.array(a) / np.linalg.norm(a) - np.array(np.array(b) / np.linalg.norm(b))).sum()
 
-print(f"float16onnx text sum difference without normalization: {np.abs(np.array(torch_text_output) - np.array(f16onnx_text_output)).sum()}")
 
-print(f"float32onnx image sum difference without normalization: {np.abs(np.array(torch_image_output) - np.array(f32onnx_image_output)).sum()}")
+print(f"float16onnx image sum difference with normalization: {compute_dif(torch_image_output, f16onnx_image_output)}")
 
-print(f"float32onnx text sum difference without normalization: {np.abs(np.array(torch_text_output) - np.array(f32onnx_text_output)).sum()}")
+print(f"float16onnx text sum difference with normalization: {compute_dif(torch_text_output ,f16onnx_text_output)}")
+
+print(f"float32onnx image sum difference with normalization: {compute_dif(torch_image_output, f32onnx_image_output)}")
+
+print(f"float32onnx text sum difference with normalization: {compute_dif(torch_text_output, f32onnx_text_output)}")
 
 
 
