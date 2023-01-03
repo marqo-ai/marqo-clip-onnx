@@ -29,6 +29,9 @@ def conversion(SOURCE, MODEL_NAME, PRETRAINED):
 
         model, _ , preprocess = open_clip.create_model_and_transforms(model_name = MODEL_NAME, device="cpu", pretrained=PRETRAINED)
         tokenizer = open_clip.get_tokenizer(MODEL_NAME)
+        print(f'image mean:{getattr(model.visual,"image_mean", None)}')
+        print(f'image mean:{getattr(model.visual, "image_std", None)}')
+
 
     dummy = np.random.rand(1000,800,3) * 255
     dummy = dummy.astype("uint8")
@@ -53,6 +56,6 @@ def conversion(SOURCE, MODEL_NAME, PRETRAINED):
 if __name__ == "__main__":
     SOURCE = "open_clip" #or "open_clip"
     MODEL_NAME= "ViT-L-14"
-    PRETRAINED = "laion400m_e32"  #only for open_clip
+    PRETRAINED = "laion2b_s32b_b82k"  #only for open_clip
 
     conversion(SOURCE, MODEL_NAME, PRETRAINED)
