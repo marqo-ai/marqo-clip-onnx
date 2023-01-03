@@ -78,8 +78,8 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
 
 if __name__ == "__main__":
     SOURCE = "open_clip" #or "open_clip"
-    MODEL_NAME= "ViT-L-14"
-    PRETRAINED = "laion2b_s32b_b82k"  #only for open_clip
+    MODEL_NAME= "ViT-B-32"
+    PRETRAINED = 'laion2b_e16'  #only for open_clip
 
     onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED)
 
