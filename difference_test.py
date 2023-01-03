@@ -5,6 +5,8 @@ import clip
 import onnx
 import onnxruntime as ort
 from PIL import Image
+from huggingface_hub import login
+from huggingface_hub import HfApi
 
 
 
@@ -75,11 +77,67 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
 
 
 
+    print({
+        f"onnx16/open_clip/{MODEL_NAME}/{PRETRAINED}":
+        {
+            "name": f"onnx16/open_clip/{MODEL_NAME}/{PRETRAINED}",
+            "dimensions": 512,
+            "type": "clip_onnx",
+            "note": f"the onnx float16 version of open_clip {MODEL_NAME}/{PRETRAINED}",
+            "repo_id": f"Marqo/onnx-open_clip-{MODEL_NAME}",
+            "visual_file": f"{f16_VISUAL_PATH}",
+            "textual_file": f"{f16_TEXTUAL_PATH}",
+            "token": None,
+            "resolution": 224,
+            "pretrained": f"{PRETRAINED}",
+            "image_mean": None,
+            "image_std": None,
+        },
+    }
+    )
+
+
+    print({
+        f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}":
+        {
+            "name": f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}",
+            "dimensions": 512,
+            "type": "clip_onnx",
+            "note": f"the onnx float32 version of open_clip {MODEL_NAME}/{PRETRAINED}",
+            "repo_id": f"Marqo/onnx-open_clip-{MODEL_NAME}",
+            "visual_file": f"{f32_VISUAL_PATH}",
+            "textual_file": f"{f32_TEXTUAL_PATH}",
+            "token": None,
+            "resolution": 224,
+            "pretrained": f"{PRETRAINED}",
+            "image_mean": None,
+            "image_std": None,
+        },
+    }
+    )
+
+
+    login("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")
+
+    api = HfApi()
+
+    model_list = [f32_VISUAL_PATH, f32_TEXTUAL_PATH, f16_VISUAL_PATH, f16_TEXTUAL_PATH]
+    for model in model_list:
+        api.upload_file(
+            path_or_fileobj = model,
+            path_in_repo = model,
+            repo_id = "Marqo/onnx-"+"open_clip-"+MODEL_NAME,
+            repo_type= "model"
+        )
+
+
+
+
 
 if __name__ == "__main__":
     SOURCE = "open_clip" #or "open_clip"
-    MODEL_NAME= "ViT-B-32"
-    PRETRAINED = 'laion2b_e16'  #only for open_clip
+    MODEL_NAME= "ViT-B-32-quickgelu"
+    PRETRAINED = 'openai'  #only for open_clip
 
     onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED)
 

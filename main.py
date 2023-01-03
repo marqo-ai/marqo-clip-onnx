@@ -55,7 +55,7 @@ def conversion(SOURCE, MODEL_NAME, PRETRAINED):
 
 if __name__ == "__main__":
     SOURCE = "open_clip" #or "open_clip"
-    MODEL_NAME= "ViT-B-32"
-    PRETRAINED = 'laion2b_e16'  #only for open_clip
+    MODEL_NAME= "ViT-B-32-quickgelu"
+    PRETRAINED = 'openai'  #only for open_clip
 
     conversion(SOURCE, MODEL_NAME, PRETRAINED)
