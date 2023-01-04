@@ -81,14 +81,14 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
         f"onnx16/open_clip/{MODEL_NAME}/{PRETRAINED}":
         {
             "name": f"onnx16/open_clip/{MODEL_NAME}/{PRETRAINED}",
-            "dimensions": 512,
+            "dimensions": np.array(f32onnx_image_output).shape[-1],
             "type": "clip_onnx",
             "note": f"the onnx float16 version of open_clip {MODEL_NAME}/{PRETRAINED}",
             "repo_id": f"Marqo/onnx-open_clip-{MODEL_NAME}",
             "visual_file": f"{f16_VISUAL_PATH}",
             "textual_file": f"{f16_TEXTUAL_PATH}",
             "token": None,
-            "resolution": 224,
+            "resolution": f32_visual_session.get_inputs()[0].shape[-1],
             "pretrained": f"{PRETRAINED}",
             "image_mean": None,
             "image_std": None,
@@ -101,14 +101,14 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
         f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}":
         {
             "name": f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}",
-            "dimensions": 512,
+            "dimensions": np.array(f32onnx_image_output).shape[-1],
             "type": "clip_onnx",
             "note": f"the onnx float32 version of open_clip {MODEL_NAME}/{PRETRAINED}",
             "repo_id": f"Marqo/onnx-open_clip-{MODEL_NAME}",
             "visual_file": f"{f32_VISUAL_PATH}",
             "textual_file": f"{f32_TEXTUAL_PATH}",
             "token": None,
-            "resolution": 224,
+            "resolution": f32_visual_session.get_inputs()[0].shape[-1],
             "pretrained": f"{PRETRAINED}",
             "image_mean": None,
             "image_std": None,
