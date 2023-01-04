@@ -158,6 +158,14 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
     repo_type = "model")
 
 
+    print(onnx16_dict)
+
+    print(onnx32_dict)
+
+
+
+
+
 
 
 
