@@ -28,9 +28,12 @@ class clip_converter(nn.Module):
         torch.onnx.export(model, dummy_input, path, **export_params)
 
     def onnx_checker(self, path: str):
-        model = onnx.load(path)
-        onnx.checker.check_model(model)
-        del model
+        try:
+            model = onnx.load(path)
+            onnx.checker.check_model(model)
+            del model
+        except:
+            onnx.checker.check_model(path)
 
     def convert_visual(self, dummy_input, wrapper=lambda x: x,
                        export_params=DEFAULT_EXPORT):
