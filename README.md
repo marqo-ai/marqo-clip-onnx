@@ -1,0 +1,1 @@
+# Marqo CLIP ONNX Converter
