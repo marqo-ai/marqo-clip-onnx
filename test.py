@@ -1,0 +1,1 @@
+print(all([None, "a", "b"]))

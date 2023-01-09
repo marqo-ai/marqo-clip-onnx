@@ -1,3 +1,4 @@
+import numpy as np
 import torch.nn.functional as F
 import torch
 from torch import nn
@@ -52,3 +53,9 @@ DEFAULT_EXPORT = dict(input_names=['input'], output_names=['output'],
                       export_params=True, verbose=False, opset_version=14,
                       do_constant_folding=True,
                       dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
+
+
+def compute_dif(a: np.ndarray, b: np.ndarray):
+    np.reshape(a, (1, -1))
+    np.reshape(b, (1, -1))
+    return np.abs(a / np.linalg.norm(a) - b / np.linalg.norm(b)).sum()

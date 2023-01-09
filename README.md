@@ -16,7 +16,7 @@ import clip
 from marqo_clip_onnx import clip_onnx
 
 
-model, preprocess = clip.load(model_name="ViT-L-14", device="cpu", jit=False)
+model, preprocess = clip.load(model_name="ViT-L/14", device="cpu", jit=False)
 tokenizer = clip.tokenizer
 
 onnx_model = clip_onnx(model, source = "openai")
