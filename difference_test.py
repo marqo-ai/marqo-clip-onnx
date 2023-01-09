@@ -16,11 +16,11 @@ def compute_dif(a, b):
 
 
 def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
-    ONNX16_VISUAL_DIR = "./onnx16-visual"
-    ONNX16_TEXTUAL_DIR = "./onnx16-textual"
+    ONNX16_VISUAL_DIR = f"./onnx16-visual-{MODEL_NAME}-{PRETRAINED}"
+    ONNX16_TEXTUAL_DIR = f"./onnx16-textual-{MODEL_NAME}-{PRETRAINED}"
 
-    ONNX32_VISUAL_DIR = "./onnx32-visual"
-    ONNX32_TEXTUAL_DIR = "./onnx32-textual"
+    ONNX32_VISUAL_DIR = f"./onnx32-visual-{MODEL_NAME}-{PRETRAINED}"
+    ONNX32_TEXTUAL_DIR = f"./onnx32-textual-{MODEL_NAME}-{PRETRAINED}"
 
     dir_list = [ONNX16_VISUAL_DIR, ONNX16_TEXTUAL_DIR, ONNX32_VISUAL_DIR, ONNX32_TEXTUAL_DIR]
     for dir in dir_list:
@@ -37,38 +37,43 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
         f16_TEXTUAL_PATH = os.path.join(ONNX16_TEXTUAL_DIR,
                                         f"onnx16-{SOURCE}-{MODEL_NAME.replace('/', '-')}-textual.onnx")
 
-        # model, preprocess = clip.load(name = MODEL_NAME, device = "cpu", jit=False)
-        # tokenizer = clip.tokenize
+        model, preprocess = clip.load(name = MODEL_NAME, device = "cpu", jit=False)
+        model.eval()
+        tokenizer = clip.tokenize
 
     elif SOURCE == "open_clip":
-        f32_VISUAL_PATH = os.path.join(ONNX32_VISUAL_DIR, f"onnx32-{SOURCE}-{MODEL_NAME.replace('/', '-')}-visual.onnx")
+        f32_VISUAL_PATH = os.path.join(ONNX32_VISUAL_DIR,
+                                       f"onnx32-{SOURCE}-{MODEL_NAME.replace('/', '-')}-{PRETRAINED}-visual.onnx")
         f32_TEXTUAL_PATH = os.path.join(ONNX32_TEXTUAL_DIR,
-                                        f"onnx32-{SOURCE}-{MODEL_NAME.replace('/', '-')}-textual.onnx")
+                                        f"onnx32-{SOURCE}-{MODEL_NAME.replace('/', '-')}-{PRETRAINED}-textual.onnx")
 
-        f16_VISUAL_PATH = os.path.join(ONNX16_VISUAL_DIR, f"onnx16-{SOURCE}-{MODEL_NAME.replace('/', '-')}-visual.onnx")
+        f16_VISUAL_PATH = os.path.join(ONNX16_VISUAL_DIR,
+                                       f"onnx16-{SOURCE}-{MODEL_NAME.replace('/', '-')}-{PRETRAINED}-visual.onnx")
         f16_TEXTUAL_PATH = os.path.join(ONNX16_TEXTUAL_DIR,
-                                        f"onnx16-{SOURCE}-{MODEL_NAME.replace('/', '-')}-textual.onnx")
+                                        f"onnx16-{SOURCE}-{MODEL_NAME.replace('/', '-')}-{PRETRAINED}-textual.onnx")
 
-        model, _, preprocess = open_clip.create_model_and_transforms(model_name=MODEL_NAME, device="cpu",
+        model, _, preprocess = open_clip.create_model_and_transforms(model_name=MODEL_NAME,
                                                                      pretrained=PRETRAINED)
+        model.eval()
         tokenizer = open_clip.get_tokenizer(MODEL_NAME)
 
-    providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+    providers = ["CPUExecutionProvider"]
 
     f16_textual_session = ort.InferenceSession(f16_TEXTUAL_PATH,
-                                               providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+                                               providers=providers)
     f16_visual_session = ort.InferenceSession(f16_VISUAL_PATH,
-                                              providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+                                              providers=providers)
 
     f32_textual_session = ort.InferenceSession(f32_TEXTUAL_PATH,
-                                               providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+                                               providers=providers)
     f32_visual_session = ort.InferenceSession(f32_VISUAL_PATH,
-                                              providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+                                             providers=providers)
 
     image = Image.open("coco.jpg")
     text = "a horse carrying a large load of hay and two people sitting on it"
 
     image_processed = preprocess(image).unsqueeze(0)
+    print(image_processed)
     text_processed = tokenizer([text])
 
     image_onnx = image_processed.detach().cpu().numpy()
@@ -83,6 +88,8 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
 
     f32onnx_image_output = f32_visual_session.run(None, {"input": image_onnx})[0]
     f32onnx_text_output = f32_textual_session.run(None, {"input": text_onnx})[0]
+
+    print(torch_image_output.shape, torch_image_output, np.linalg.norm(torch_image_output))
 
     print(
         f"float16onnx image sum difference with normalization: {compute_dif(torch_image_output, f16onnx_image_output)}")
@@ -114,8 +121,6 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
             },
     }
 
-
-
     onnx32_dict = {
         f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}":
             {
@@ -134,45 +139,37 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
             },
     }
 
-
-
-    login("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")
-
-    api = HfApi()
-
-    model_path_list = [f32_VISUAL_PATH, f32_TEXTUAL_PATH, f16_VISUAL_PATH, f16_TEXTUAL_PATH]
-    for model_path in model_path_list:
-        dir = os.path.dirname(model_path)
-    if len(os.listdir(dir)) == 1 and (os.path.basename(model_path) in os.listdir(dir)):
-        MODEL_FILE_NAME = os.path.basename(model_path)
-
-    elif len(os.listdir(dir)) > 1 and (os.path.basename(model_path) in os.listdir(dir)):
-        MODEL_FILE_NAME = os.path.basename(model_path).replace(".onnx", ".zip")
-        model_path = shutil.make_archive(MODEL_FILE_NAME.replace(".zip", ""), "zip", dir)
-        onnx32_dict["visual_file"] = onnx32_dict["visual_file"].replace(".onnx", ".zip")
-
-    api.upload_file(
-    path_or_fileobj = model_path,
-    path_in_repo = MODEL_FILE_NAME,
-    repo_id = "Marqo/onnx-" + "open_clip-" + MODEL_NAME,
-    repo_type = "model")
-
+    # login("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")
+    #
+    # api = HfApi()
+    #
+    # model_path_list = [f32_VISUAL_PATH, f32_TEXTUAL_PATH, f16_VISUAL_PATH, f16_TEXTUAL_PATH]
+    # for model_path in model_path_list:
+    #     dir = os.path.dirname(model_path)
+    #     if len(os.listdir(dir)) == 1 and (os.path.basename(model_path) in os.listdir(dir)):
+    #         MODEL_FILE_NAME = os.path.basename(model_path)
+    #
+    #     elif len(os.listdir(dir)) > 1 and (os.path.basename(model_path) in os.listdir(dir)):
+    #         MODEL_FILE_NAME = os.path.basename(model_path).replace(".onnx", ".zip")
+    #         model_path = shutil.make_archive(MODEL_FILE_NAME.replace(".zip", ""), "zip", dir)
+    #         up_dict = {"visual_file": MODEL_FILE_NAME}
+    #         onnx32_dict[f"onnx32/open_clip/{MODEL_NAME}/{PRETRAINED}"].update(up_dict)
+    #
+    #     api.upload_file(
+    #         path_or_fileobj=model_path,
+    #         path_in_repo=MODEL_FILE_NAME,
+    #         repo_id="Marqo/onnx-" + "open_clip-" + MODEL_NAME,
+    #         repo_type="model")
 
     print(onnx16_dict)
 
     print(onnx32_dict)
 
 
-
-
-
-
-
-
 if __name__ == "__main__":
     SOURCE = "open_clip"  # or "open_clip"
-MODEL_NAME = "ViT-H-14"
-PRETRAINED = 'laion2b_s32b_b79k'  # only for open_clip
+    MODEL_NAME = "RN50"
+    PRETRAINED = 'yfcc15m'  # only for open_clip
 
-onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED)
+    onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED)
 

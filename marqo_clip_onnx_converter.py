@@ -9,11 +9,11 @@ class clip_converter(nn.Module):
                  textual_path: str = "clip_textual.onnx", source:str = ""):
         super().__init__()
         self.model = model
+        self.model.eval()
         self.visual_path = visual_path
         self.textual_path = textual_path
         self.visual_flag = False
         self.textual_flag = False
-        self.model.eval()
         if source.startswith("openai"):
             self.wrapper = Openai_Textual
         elif source.startswith("open_clip"):
@@ -35,10 +35,10 @@ class clip_converter(nn.Module):
         except:
             onnx.checker.check_model(path)
 
-    def convert_visual(self, dummy_input, wrapper=lambda x: x,
+    def convert_visual(self, dummy_input,
                        export_params=DEFAULT_EXPORT):
-        visual = wrapper(self.model.visual)
-        self.torch_export(visual, dummy_input, self.visual_path,
+        self.model.visual.eval()
+        self.torch_export(self.model.visual, dummy_input, self.visual_path,
                           export_params=export_params)
         self.onnx_checker(self.visual_path)
 
@@ -49,7 +49,6 @@ class clip_converter(nn.Module):
         self.onnx_checker(self.textual_path)
 
     def convert2onnx(self, visual_input=None, textual_input=None, verbose=True,
-                     visual_wrapper=lambda x: x,
                      visual_export_params=DEFAULT_EXPORT,
                      textual_export_params=DEFAULT_EXPORT):
         isinstance_visual_input = isinstance(visual_input, (torch.Tensor))
@@ -66,7 +65,7 @@ class clip_converter(nn.Module):
             self.visual_flag = True
             if verbose:
                 print("[CLIP ONNX] Start convert visual model")
-            self.convert_visual(visual_input, visual_wrapper, visual_export_params)
+            self.convert_visual(visual_input, visual_export_params)
             if verbose:
                 print("[CLIP ONNX] Start check visual model")
             self.onnx_checker(self.visual_path)
