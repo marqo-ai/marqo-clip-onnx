@@ -2,3 +2,5 @@ torch
 onnxruntime
 onnx
 onnxmltools
+open-clip-torch==2.9.2
+openai-clip

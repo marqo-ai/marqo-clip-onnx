@@ -1,5 +1,5 @@
 import onnx
-from marqo_clip_onnx_converter import clip_converter
+from marqo_clip_onnx import clip_converter
 import clip
 import open_clip
 import numpy as np
