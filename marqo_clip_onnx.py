@@ -4,7 +4,7 @@ from torch import nn
 from utils import Openai_Textual, OpenClip_Textual, DEFAULT_EXPORT
 
 
-class clip_converter(nn.Module):
+class clip_onnx(nn.Module):
     def __init__(self, model, visual_path: str = "clip_visual.onnx",
                  textual_path: str = "clip_textual.onnx", source:str = ""):
         super().__init__()
