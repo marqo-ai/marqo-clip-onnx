@@ -9,6 +9,8 @@ pip install git+https://github.com/marqo-ai/marqo-clip-onnx
 ```
 # Examples
 
+The full script of the example can be found [here](examples/example.py)
+
 This library supports two major clip implementations, [openai clip]() and [open_clip]().
 
 
