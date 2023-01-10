@@ -65,7 +65,8 @@ In this step, we compute the *normalized sum difference* between the outputs of 
 correctness of our onnx models.
 
 ```python
-image = Image.open("examples/coco.jpg")
+import requests
+image = Image.open(requests.get("https://raw.githubusercontent.com/marqo-ai/marqo-clip-onnx/main/examples/coco.jpg", stream = True).raw)
 text = "a horse carrying a large load of hay and two people sitting on it"
 
 processed_image = preprocess(image).unsqueeze(0)
