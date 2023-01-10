@@ -69,7 +69,7 @@ def onnx_evaluation(SOURCE, MODEL_NAME, PRETRAINED):
     f32_visual_session = ort.InferenceSession(f32_VISUAL_PATH,
                                              providers=providers)
 
-    image = Image.open("coco.jpg")
+    image = Image.open("examples/coco.jpg")
     text = "a horse carrying a large load of hay and two people sitting on it"
 
     image_processed = preprocess(image).unsqueeze(0)

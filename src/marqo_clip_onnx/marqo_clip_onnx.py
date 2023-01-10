@@ -1,7 +1,7 @@
 import torch
 import onnx
 from torch import nn
-from utils import Openai_Textual, OpenClip_Textual, DEFAULT_EXPORT, compute_dif
+from .utils import Openai_Textual, OpenClip_Textual, DEFAULT_EXPORT, compute_dif
 import os
 from onnxmltools.utils import float16_converter
 import onnxruntime as ort

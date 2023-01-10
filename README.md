@@ -9,29 +9,30 @@ This library supports two major clip implementations, [openai clip]() and [open_
 
 
 ### Step 1: Model Loading
-#### Openai CLIP Example
+#### For OpenAI CLIP Mode
 
 ```python
 import clip
 from marqo_clip_onnx import clip_onnx
 
 
-model, preprocess = clip.load(model_name="ViT-L/14", device="cpu", jit=False)
-tokenizer = clip.tokenizer
+model, preprocess = clip.load(name="ViT-L/14", device="cpu", jit=False)
+tokenizer = clip.tokenize
 
 onnx_model = clip_onnx(model, source = "openai")
 ```
-#### Open_CLIP Example
+Or
+#### For Open_CLIP Example CLIP
 ```python
 import open_clip
 from marqo_clip_onnx import clip_onnx
 
 
-model, _, preprocess = open_clip.create_model_from_pretrained(model_name="ViT-L-14", pretrained="laion400m_e32",
+model, _, preprocess = open_clip.create_model_and_transforms(model_name="ViT-L-14", pretrained="laion400m_e32",
                                                               device="cpu")
 tokenizer = open_clip.get_tokenizer("ViT-L-14")
 
-onnx_model = clip_onnx(model, source = "open_clip", device = "cpu")
+onnx_model = clip_onnx(model, source = "open_clip")
 ```
 ### Step 2: ONNX Conversion
 
@@ -60,8 +61,14 @@ In this step, we compute the *normalized sum difference* between the outputs of 
 correctness of our onnx models.
 
 ```python
-image = Image.open("coco.jpg")
+image = Image.open("examples/coco.jpg")
 text = "a horse carrying a large load of hay and two people sitting on it"
 
-onnx_model.check_difference(exampl_image = image, example_text = text)
+processed_image = preprocess(image).unsqueeze(0)
+processed_text = tokenizer([text])
+
+onnx_image = processed_image.detach().cpu().numpy()
+onnx_text = processed_text.detach().cpu().numpy()
+
+onnx_model.check_difference(image=processed_image, text=processed_text, onnx_image=onnx_image, onnx_text=onnx_text)
 ```

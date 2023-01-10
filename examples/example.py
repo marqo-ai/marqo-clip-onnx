@@ -1,11 +1,13 @@
-import clip
-from marqo_clip_onnx import clip_onnx
+import open_clip
+from src.marqo_clip_onnx.marqo_clip_onnx import clip_onnx
 
 
-model, preprocess = clip.load(name="ViT-B/32", device="cpu", jit=False)
-tokenizer = clip.tokenize
+model, _, preprocess = open_clip.create_model_and_transforms(model_name="ViT-L-14", pretrained="laion400m_e32",
+)
+tokenizer = open_clip.get_tokenizer("ViT-L-14")
 
-onnx_model = clip_onnx(model, source = "openai")
+onnx_model = clip_onnx(model, source = "open_clip")
+
 
 import numpy as np
 from PIL import Image
@@ -16,9 +18,7 @@ dummy_image = preprocess(Image.fromarray(dummy).convert("RGB")).unsqueeze(0).cpu
 
 dummy_text = tokenizer(["a diagram", "a dog", "a cat"]).cpu()
 
-
-onnx_model.convert_onnx32(visual_input = dummy_image, textual_input=dummy_text, verbose=True)
-
+onnx_model.convert_onnx32(visual_input=dummy_image, textual_input=dummy_text, verbose=True)
 # If you also need onnx16 version
 onnx_model.convert_onnx16()
 
