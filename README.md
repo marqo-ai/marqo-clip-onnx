@@ -2,7 +2,11 @@
 
 This is a simple library to convert pytorch clip model to their onnx versions.
 
-
+# Installation
+Install the package using:
+```bash
+pip install git+https://github.com/marqo-ai/marqo-clip-onnx
+```
 # Examples
 
 This library supports two major clip implementations, [openai clip]() and [open_clip]().

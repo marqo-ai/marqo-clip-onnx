@@ -1,5 +1,5 @@
 import open_clip
-from src.marqo_clip_onnx.marqo_clip_onnx import clip_onnx
+from marqo_clip_onnx import clip_onnx
 
 
 model, _, preprocess = open_clip.create_model_and_transforms(model_name="ViT-L-14", pretrained="laion400m_e32",
